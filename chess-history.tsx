@@ -14,75 +14,25 @@ import {Separator} from "@/components/ui/separator";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import useChessComGames from "@/components/hooks/use-chess-com-games";
 
-// Datos de ejemplo para el historial de partidas
-const chessGames = [
-  {
-    id: 1,
-    white: "Magnus Carlsen",
-    black: "Hikaru Nakamura",
-    result: "1-0",
-    date: "2023-11-15",
-    event: "Champions Chess Tour",
-    opening: "Siciliana",
-    moves: 42,
-    timeControl: "15+10",
-  },
-  {
-    id: 2,
-    white: "Fabiano Caruana",
-    black: "Magnus Carlsen",
-    result: "½-½",
-    date: "2023-10-28",
-    event: "Sinquefield Cup",
-    opening: "Ruy López",
-    moves: 67,
-    timeControl: "120+30",
-  },
-  {
-    id: 3,
-    white: "Hikaru Nakamura",
-    black: "Ian Nepomniachtchi",
-    result: "0-1",
-    date: "2023-09-12",
-    event: "Grand Chess Tour",
-    opening: "Defensa Francesa",
-    moves: 38,
-    timeControl: "25+10",
-  },
-  {
-    id: 4,
-    white: "Ding Liren",
-    black: "Alireza Firouzja",
-    result: "1-0",
-    date: "2023-08-05",
-    event: "Torneo de Candidatos",
-    opening: "Defensa India de Rey",
-    moves: 54,
-    timeControl: "120+30",
-  },
-  {
-    id: 5,
-    white: "Anish Giri",
-    black: "Wesley So",
-    result: "½-½",
-    date: "2023-07-22",
-    event: "Tata Steel Chess",
-    opening: "Defensa Siciliana",
-    moves: 45,
-    timeControl: "90+30",
-  },
-  {
-    id: 6,
-    white: "Levon Aronian",
-    black: "Viswanathan Anand",
-    result: "0-1",
-    date: "2023-06-18",
-    event: "Norway Chess",
-    opening: "Apertura Inglesa",
-    moves: 39,
-    timeControl: "120+10",
-  },
-];
+interface ChessPlayer {
+  rating: number;
+  result: string;
+  username: string;
+  uuid: string;
+}
+
+interface ChessGame {
+  url: string;
+  time_control: string;
+  end_time: number;
+  rated: boolean;
+  time_class: string;
+  rules: string;
+  white: ChessPlayer;
+  black: ChessPlayer;
+  fen: string;
+  eco?: string;
+}
 
 export default function ChessHistory() {
   const router = useRouter();
@@ -109,7 +59,7 @@ export default function ChessHistory() {
   };
 
   // Filtrar partidas según el término de búsqueda
-  const filteredGames = games;
+  const filteredGames: ChessGame[] = games;
 
   // Función para formatear el control de tiempo
   const formatTimeControl = (timeControl: string) => {
