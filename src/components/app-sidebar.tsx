@@ -59,7 +59,7 @@ const data = {
       items: [
         {
           title: "Search",
-          url: "#",
+          url: "/dashboard/search",
         },
         {
           title: "My games",
@@ -67,7 +67,7 @@ const data = {
         },
         {
           title: "Load PGN",
-          url: "#",
+          url: "/dashboard",
         },
       ],
     },
