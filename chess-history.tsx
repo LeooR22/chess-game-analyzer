@@ -4,40 +4,26 @@ import type React from "react";
 
 import {useState} from "react";
 import {useRouter, useSearchParams} from "next/navigation";
-import {Calendar, Clock, Search, Trophy, User, ExternalLink} from "lucide-react";
+import {Calendar, Clock, Search, Trophy, User} from "lucide-react";
+import Link from "next/link";
 
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
 import {Separator} from "@/components/ui/separator";
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {Tabs, TabsContent} from "@/components/ui/tabs";
 import useChessComGames from "@/components/hooks/use-chess-com-games";
-
-interface ChessPlayer {
-  rating: number;
-  result: string;
-  username: string;
-  uuid: string;
-}
-
-interface ChessGame {
-  url: string;
-  time_control: string;
-  end_time: number;
-  rated: boolean;
-  time_class: string;
-  rules: string;
-  white: ChessPlayer;
-  black: ChessPlayer;
-  fen: string;
-  eco?: string;
-}
+import {Game, PlayerMetadata} from "@/types/chesscom";
 
 export default function ChessHistory() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get("username") || "");
+
+  const year = 2025;
+  const month = 3;
+
   const {games, loading, error} = useChessComGames(searchTerm, {year: 2025, month: 3});
 
   console.log(games, loading, error);
@@ -59,7 +45,7 @@ export default function ChessHistory() {
   };
 
   // Filtrar partidas según el término de búsqueda
-  const filteredGames: ChessGame[] = games;
+  const filteredGames: Game[] = games;
 
   // Función para formatear el control de tiempo
   const formatTimeControl = (timeControl: string) => {
@@ -84,16 +70,27 @@ export default function ChessHistory() {
   };
 
   // Función para determinar el resultado de un jugador
-  const getPlayerResult = (player: ChessPlayer) => {
+  const getPlayerResult = (player: PlayerMetadata) => {
     if (player.result === "win") return "Victoria";
     if (
       player.result === "checkmated" ||
       player.result === "resigned" ||
-      player.result === "timeout"
+      player.result === "timeout" ||
+      player.result === "abandoned"
     )
       return "Derrota";
 
     return "Tablas";
+  };
+
+  const getAccuracyColor = (accuracy?: number) => {
+    if (!accuracy) return "bg-gray-300";
+    if (accuracy >= 90) return "bg-green-500";
+    if (accuracy >= 80) return "bg-green-400";
+    if (accuracy >= 70) return "bg-yellow-400";
+    if (accuracy >= 60) return "bg-orange-400";
+
+    return "bg-red-500";
   };
 
   // Función para mostrar el color del resultado
@@ -103,16 +100,6 @@ export default function ChessHistory() {
 
     return "bg-yellow-500";
   };
-
-  // Función para mostrar el color del resultado
-  // const getResultBadge = (result: string, player: "white" | "black") => {
-  //   if (result === "1-0" && player === "white") return "bg-green-500";
-  //   if (result === "0-1" && player === "black") return "bg-green-500";
-  //   if ((result === "1-0" && player === "black") || (result === "0-1" && player === "white"))
-  //     return "bg-red-500";
-
-  //   return "bg-yellow-500";
-  // };
 
   return (
     <Card className="mx-auto w-full max-w-4xl">
@@ -172,8 +159,8 @@ export default function ChessHistory() {
                     </div>
 
                     <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full border border-black bg-white">
+                      <div className="flex items-start gap-3">
+                        <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full border border-black bg-white">
                           <div className="h-4 w-4 rounded-full border border-black" />
                         </div>
                         <div className="flex-1">
@@ -189,11 +176,26 @@ export default function ChessHistory() {
                           >
                             {getPlayerResult(game.white)}
                           </Badge>
+
+                          {game?.accuracies?.white && (
+                            <div className="mt-2">
+                              <div className="mb-1 flex items-center justify-between text-xs">
+                                <span>Precisión</span>
+                                <span className="font-medium"> ({game.accuracies.white}) %</span>
+                              </div>
+                              <div className="h-1.5 w-full rounded-full bg-gray-200">
+                                <div
+                                  className={`h-1.5 rounded-full ${getAccuracyColor(game.accuracies.white)}`}
+                                  style={{width: `${Math.min(game.accuracies.white, 100)}%`}}
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white bg-black">
+                      <div className="flex items-start gap-3">
+                        <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full border border-white bg-black">
                           <div className="h-4 w-4 rounded-full border border-white" />
                         </div>
                         <div className="flex-1">
@@ -209,6 +211,21 @@ export default function ChessHistory() {
                           >
                             {getPlayerResult(game.black)}
                           </Badge>
+
+                          {game?.accuracies?.black && (
+                            <div className="mt-2">
+                              <div className="mb-1 flex items-center justify-between text-xs">
+                                <span>Precisión</span>
+                                <span className="font-medium"> ({game.accuracies.black}) %</span>
+                              </div>
+                              <div className="h-1.5 w-full rounded-full bg-gray-200">
+                                <div
+                                  className={`h-1.5 rounded-full ${getAccuracyColor(game.accuracies.black)}`}
+                                  style={{width: `${Math.min(game.accuracies.black, 100)}%`}}
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -218,15 +235,11 @@ export default function ChessHistory() {
                         {game.rated ? "Partida clasificatoria" : "Partida amistosa"}
                       </div>
                       <Button asChild size="sm" variant="outline">
-                        <a
-                          className="flex items-center gap-1"
-                          href={game.url}
-                          rel="noopener noreferrer"
-                          target="_blank"
+                        <Link
+                          href={`/dashboard/game/${year}/${month.toString().padStart(2, "0")}/${game.uuid}`}
                         >
-                          Ver partida
-                          <ExternalLink className="ml-1 h-3 w-3" />
-                        </a>
+                          Game review
+                        </Link>
                       </Button>
                     </div>
                   </div>
