@@ -1,5 +1,7 @@
 import {useState, useEffect} from "react";
 
+import {Game} from "@/types/chesscom";
+
 const padMonth = (month: number) => month.toString().padStart(2, "0");
 
 interface GamesPeriod {
@@ -8,7 +10,7 @@ interface GamesPeriod {
 }
 
 const useChessComGames = (username: string, gamesPeriod: GamesPeriod) => {
-  const [games, setGames] = useState([]);
+  const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

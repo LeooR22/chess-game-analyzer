@@ -10,10 +10,10 @@ import {Textarea} from "@/components/ui/textarea";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 
-export function ChessBoardClient() {
+export function ChessBoardClient({pgnProp = ""}: {pgnProp?: string}) {
   const [game, setGame] = useState(new Chess());
   const [fen, setFen] = useState(game.fen());
-  const [pgn, setPgn] = useState("");
+  const [pgn, setPgn] = useState(pgnProp);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(-1);
   const [analysis, setAnalysis] = useState<string>("");

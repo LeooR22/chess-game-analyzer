@@ -236,7 +236,7 @@ export default function ChessHistory() {
                       </div>
                       <Button asChild size="sm" variant="outline">
                         <Link
-                          href={`/dashboard/game/${year}/${month.toString().padStart(2, "0")}/${game.uuid}`}
+                          href={`/dashboard/game/${searchTerm}/${year}/${month.toString().padStart(2, "0")}/${game.uuid}`}
                         >
                           Game review
                         </Link>
